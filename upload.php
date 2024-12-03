@@ -17,9 +17,9 @@
           </form>
       <?php endif;?>
       <?php
-$dsn = "mysql:host=localhost; dbname=xxx; charset=utf8";
-$username = "xxx";
-$password = "xxx";
+$dsn = "mysql:host=localhost; dbname=images; charset=utf8";
+$username = "root";
+$password = "root";
 try {
     $dbh = new PDO($dsn, $username, $password);
 } catch (PDOException $e) {
