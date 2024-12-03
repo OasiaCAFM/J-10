@@ -16,6 +16,7 @@
               <button><input type="submit" name="upload" value="送信"></button>
           </form>
       <?php endif;?>
+      <!---->
       <?php
 $dsn = "mysql:host=localhost; dbname=images; charset=utf8";
 $username = "root";
