@@ -1,6 +1,6 @@
 <?php
 
-const DB_HOST = 'mysql:dbname=sumerDev;host=localhost';
+const DB_HOST = 'mysql:dbname=users;host=localhost';
 const DB_USER = 'root';
 const DB_PASSWORD = 'root';
 
