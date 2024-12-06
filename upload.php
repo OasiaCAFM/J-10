@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="ja">
     <head>
         <meta charset="utf-8">
-    </head> 
-  <body>
-      <header><li><a href="logout.php" class="btn btn-danger ml-3">サインアウト</a></li></header>
-      <h1>画像アップロード</h1>
+    </head>
+
+      <p><h1>photos</p></h1>
+      <button>click</button>
+      <hr noshade> 
+
+        
       <!--送信ボタンが押された場合-->
       <?php if (isset($_POST['upload'])): ?>
           <p><?php echo $message; ?></p>
@@ -16,6 +18,7 @@
               <button><input type="submit" name="upload" value="送信"></button>
           </form>
       <?php endif;?>
+      <!---->
       <?php
 $dsn = "mysql:host=localhost; dbname=images; charset=utf8";
 $username = "root";
@@ -44,17 +47,6 @@ try {
     }
 ?>
 
-<h1>画像アップロード</h1>
-<!--送信ボタンが押された場合-->
-<?php if (isset($_POST['upload'])): ?>
-    <p><?php echo $message; ?></p>
-    <p><a href="image.php">画像表示へ</a></p>
-<?php else: ?>
-    <form method="post" enctype="multipart/form-data">
-        <p>アップロード画像</p>
-        <input type="file" name="image">
-        <button><input type="submit" name="upload" value="送信"></button>
-    </form>
-<?php endif;?>
+
   </body>
 </html>
