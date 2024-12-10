@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iPhone風写真一覧</title>
     <style>
+
         /* 共通のスタイル */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -30,6 +31,7 @@
             justify-content: flex-start;
             padding-top: 20px;
             text-align: center;
+
             transition: background-color 0.3s;
         }
 
@@ -40,12 +42,14 @@
             color: #000000;  /* ライトテーマ時の文字色 */
         }
 
+
         .menu-item {
             display: flex;
             align-items: center;
             margin: 20px 0;
             padding-left: 20px;
             font-size: 18px;
+
             color: #000000;  /* ライトテーマ時の文字色 */
             cursor: pointer;
             transition: color 0.3s;
@@ -124,34 +128,43 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
+
             margin-top: 20px;
         }
 
         .photo-item {
             background-color: #ffffff;
+
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
             text-align: center;
         }
+
 
         .photo-item:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
 
+
+
+    
         .photo-thumb {
             width: 100%;
             height: 150px;
             object-fit: cover;
         }
 
+
         .photo-info {
             padding: 10px;
             text-align: center;
         }
+
 
         .photo-title {
             font-size: 16px;
@@ -159,6 +172,7 @@
             color: #333;
             margin: 0;
         }
+
 
         /* フルスクリーンポップアップ */
         .photo-modal {
@@ -243,12 +257,14 @@
         .back-btn:hover + .back-btn-tooltip {
             opacity: 1;
             pointer-events: auto;
+
         }
     </style>
 </head>
 <body>
 
 <!-- サイドバー -->
+
 <div class="sidebar" id="sidebar">
     <div class="menu-title">photos</div>
     <div class="menu-item">
@@ -277,10 +293,12 @@
 
     <div class="menu-item">
         <a href="account-page.html">アカウント詳細</a>
+
     </div>
 </div>
 
 <!-- 写真追加ボタン -->
+
 <form action="upload.php" method="get" style="display: inline;">
     <button type="submit" class="add-photo-btn">写真を追加</button>
 </form>
@@ -293,19 +311,23 @@
             <a href="#photo1">
                 <img src="https://via.placeholder.com/150" alt="写真1" class="photo-thumb">
             </a>
+
             <div class="photo-info">
                 <p class="photo-title">写真1</p>
             </div>
         </div>
         <!-- 写真2 -->
         <div class="photo-item">
+          
             <a href="#photo2">
                 <img src="https://via.placeholder.com/150" alt="写真2" class="photo-thumb">
             </a>
+
             <div class="photo-info">
                 <p class="photo-title">写真2</p>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -326,4 +348,5 @@
 
 </body>
 </html>
-ほげ
+
+
