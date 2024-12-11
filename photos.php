@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone風写真一覧</title>
     <style>
         /* 共通のスタイル */
         body {
@@ -256,10 +255,10 @@
 <div class="sidebar" id="sidebar">
     <div class="menu-title">photos</div>
     <div class="menu-item">
-        <a href="photos-page.html">写真</a>
+        写真</a>
     </div>
     <div class="menu-item">
-        <a href="albums-page.html">アルバム</a>
+        <a href="albams.php">アルバム</a>
     </div>
     <div class="menu-item">
         <a href="tags-page.html">タグ作成</a>
@@ -322,11 +321,7 @@
 <div id="photo2" class="photo-modal">
     <a href="#" class="close-btn">&times;</a>
     <img src="https://via.placeholder.com/500" alt="写真2">
-</div>
-
-<!-- ログイン画面に戻るボタン -->
-<a href="login-page.html" class="back-btn">&larr;</a>
-<div class="back-btn-tooltip">ログイン画面に戻る</div>
+    </div>
 
 </body>
 </html>
