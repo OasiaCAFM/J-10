@@ -143,24 +143,7 @@
             margin: 10px 0 0;
             color: #333;
         }
-        /* ←ボタン */
-        .back-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            color: #007bff;
-            text-decoration: none;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            z-index: 1001;
-        }
-
-        .back-btn:hover {
-            color: #0056b3;
-        }
-
+        
         /* ポップアップテキスト */
         .back-btn-tooltip {
             position: fixed;
