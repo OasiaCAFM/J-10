@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iPhone風写真一覧</title>
     <style>
-
-
         /* 共通のスタイル */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -22,7 +20,6 @@
         .sidebar {
             width: 200px;
             background-color: #ffffff;  /* ライトテーマ時のサイドバー背景色 */
-
             position: fixed;
             top: 0;
             left: 0;
@@ -33,8 +30,6 @@
             justify-content: flex-start;
             padding-top: 20px;
             text-align: center;
-
-
             transition: background-color 0.3s;
         }
 
@@ -94,13 +89,10 @@
         }
 
         .filter-item {
-        margin: 5px 0;
-        font-size: 14px;
-        color: #000000;  /* ライトテーマ時の文字色 */
-        border-bottom: none;  /* 下線を消す */
+            margin: 5px 0;
+            font-size: 14px;
+            color: #000000;  /* ライトテーマ時の文字色 */
         }
-
-        
 
         /* 絞り込み詳細にカーソルを合わせたときに青色 */
         .filter-item:hover {
@@ -134,30 +126,22 @@
             margin-top: 60px;
         }
 
-
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 15px;
-
-
             margin-top: 20px;
         }
 
         .photo-item {
             background-color: #ffffff;
-
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-
-
             text-align: center;
         }
-
-
 
         .photo-item:hover {
             transform: scale(1.05);
@@ -181,8 +165,6 @@
             color: #333;
             margin: 0;
         }
-
-
 
         /* フルスクリーンポップアップ */
         .photo-modal {
@@ -267,15 +249,12 @@
         .back-btn:hover + .back-btn-tooltip {
             opacity: 1;
             pointer-events: auto;
-
-
         }
     </style>
 </head>
 <body>
 
-
-
+<!-- サイドバー -->
 <div class="sidebar" id="sidebar">
     <div class="menu-title">photos</div>
     <div class="menu-item">
@@ -297,18 +276,17 @@
     <!-- 絞り込みポップアップ -->
     <input type="checkbox" id="filter-toggle">
     <div class="filter-modal">
-        <a href="narrowed.php" class="filter-item">絞り込み1</a>
+        <div class="filter-item">絞り込み1</div>
         <div class="filter-item">絞り込み2</div>
         <div class="filter-item">絞り込み3</div>
     </div>
 
     <div class="menu-item">
         <a href="account-page.html">アカウント詳細</a>
-
     </div>
 </div>
 
-
+<!-- 写真追加ボタン -->
 <form action="upload.php" method="get" style="display: inline;">
     <button type="submit" class="add-photo-btn">写真を追加</button>
 </form>
@@ -320,26 +298,20 @@
         <div class="photo-item">
             <a href="#photo1">
                 <img src="https://via.placeholder.com/150" alt="写真1" class="photo-thumb">
-
+            </a>
             <div class="photo-info">
                 <p class="photo-title">写真1</p>
             </div>
         </div>
         <!-- 写真2 -->
         <div class="photo-item">
-
-          
             <a href="#photo2">
                 <img src="https://via.placeholder.com/150" alt="写真2" class="photo-thumb">
             </a>
-
-
             <div class="photo-info">
                 <p class="photo-title">写真2</p>
             </div>
         </div>
-
-
     </div>
 </div>
 
@@ -360,4 +332,3 @@
 
 </body>
 </html>
-
