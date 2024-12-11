@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
     <meta charset="utf-8">
@@ -112,6 +113,7 @@
 <?php
 // データベース接続設定
 $dsn = "mysql:host=localhost;dbname=images;charset=utf8";
+
 $username = "root";
 $password = "root";
 
