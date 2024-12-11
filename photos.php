@@ -92,6 +92,7 @@
             margin: 5px 0;
             font-size: 14px;
             color: #000000;  /* ライトテーマ時の文字色 */
+            border-bottom: none;
         }
 
         /* 絞り込み詳細にカーソルを合わせたときに青色 */
@@ -154,14 +155,11 @@
             object-fit: cover;
         }
 
-        .photo-info {
-            padding: 10px;
-            text-align: center;
-        }
-
         .photo-title {
             font-size: 16px;
             font-weight: 600;
+            padding: 10px;
+            text-align: center;
             color: #333;
             margin: 0;
         }
@@ -276,7 +274,7 @@
     <!-- 絞り込みポップアップ -->
     <input type="checkbox" id="filter-toggle">
     <div class="filter-modal">
-        <div class="filter-item">絞り込み1</div>
+        <a href="narrowed.php" class="filter-item">絞り込み1</a>
         <div class="filter-item">絞り込み2</div>
         <div class="filter-item">絞り込み3</div>
     </div>
