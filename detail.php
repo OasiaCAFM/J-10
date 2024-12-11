@@ -202,8 +202,8 @@
     <!-- サイドバー -->
     <div class="sidebar">
         <div class="menu-title">photos</div>
-        <div class="menu-item"><a href="photos-page.html">写真</a></div>
-        <div class="menu-item"><a href="albums-page.html">アルバム</a></div>
+        <div class="menu-item"><a href="photos.php">写真</a></div>
+        <div class="menu-item"><a href="albums.php">アルバム</a></div>
         <div class="menu-item"><a href="tags-page.html">タグ作成</a></div>
         <div class="menu-item"><a href="sort-page.html">並べ替え</a></div>
         <!-- 絞り込みメニュー -->
