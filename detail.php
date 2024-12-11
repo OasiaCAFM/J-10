@@ -164,20 +164,6 @@
             cursor: pointer;
         }
 
-        /* ←ボタン */
-        .back-btn {
-            position: fixed;
-            top: 30px; /* 下に少し移動 */
-            left: 10px;
-            font-size: 24px;
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .back-btn:hover {
-            color: #0056b3;
-        }
-
         /* ボタンのスタイル */
         .photo-buttons {
             display: flex;
