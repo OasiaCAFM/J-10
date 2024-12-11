@@ -188,7 +188,7 @@
     <div class="sidebar">
         <div class="menu-title">photos</div>
         <div class="menu-item">
-            <a href="photos-page.html">写真</a>
+            <a href="photos.php">写真</a>
         </div>
         <div class="menu-item">
             <a href="albums-page.html">アルバム</a>
@@ -243,10 +243,6 @@
             </div>
         </div>
     </div>
-
-<!-- 写真一覧画面に戻るボタン -->
-<a href="login-page.html" class="back-btn">&larr;</a>
-<div class="back-btn-tooltip">写真一覧画面に戻る</div>
 
 </body>
 </html>
