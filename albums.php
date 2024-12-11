@@ -174,7 +174,7 @@
             <a href="photos.php">写真</a>
         </div>
         <div class="menu-item">
-            <a href="albums-page.html">アルバム</a>
+            <a href="albums.php">アルバム</a>
         </div>
         <div class="menu-item">
             <a href="tags-page.html">タグ作成</a>

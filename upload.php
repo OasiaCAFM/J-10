@@ -8,7 +8,7 @@
     <title>画像アップロード</title>
 
     <div class="button001">
-        <a href="#" onclick="history.back()">戻る</a>      
+        <a href="photos.php">戻る</a>      
     </div>
 
 
