@@ -13,6 +13,9 @@
             margin: 0;
             padding: 0;
             display: flex;
+            justify-content: center; /* 画面の中央に配置 */
+            align-items: flex-start; /* 上に揃える */
+            height: 100vh; /* 高さを100vhに */
         }
 
         /* サイドバー */
@@ -55,24 +58,22 @@
 
         /* メインエリア */
         .main-area {
-            margin-left: 200px;
+            margin-left: 220px; /* サイドバーの幅分だけ左にずらす */
+            margin-top: 30px; /* ここで上下の位置を調整 */
             padding: 20px;
-            width: calc(100% - 200px);
-            background-color: #f4f4f4;
+            max-width: 800px; /* 最大幅を設定して中央揃え */
+            width: 100%; /* 100%に設定して制限内で幅を調整 */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            align-items: center; /* 中央に揃える */
         }
 
-        .title-input,
-        .memo-input {
+        .title-text, .memo-text {
             width: 100%;
-            max-width: 600px;
             padding: 12px;
             font-size: 16px;
+            background-color: #ffffff;
             border: 1px solid #ccc;
             border-radius: 5px;
             margin-bottom: 15px;
@@ -81,12 +82,12 @@
 
         .photo-container {
             width: 100%;
-            max-width: 600px;
             background-color: #ffffff;
             border-radius: 12px;
             padding: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -95,17 +96,31 @@
 
         .photo-placeholder {
             width: 100%;
-            height: 300px;
+            position: relative;
+            padding-top: 50%; /* 4:3 の比率 */
             background-color: #ddd;
             border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .photo-placeholder::after {
+            content: "";
+            display: block;
+            padding-top: 0;
+        }
+
+        /* 詳細情報のスタイル */
+        .photo-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2列に設定 */
+            gap: 10px; /* 列間の余白 */
+            width: 100%;
         }
 
         .photo-details span {
-            display: block;
             font-size: 14px;
             color: #555;
         }
@@ -119,10 +134,10 @@
         .filter-modal {
             display: block;
             position: absolute;
-            top: 320px;
+            top: 340px; /* 下に少し移動 */
             left: 200px;
             width: 200px;
-            background-color: #ffffff;  /* ライトテーマに合わせた背景色 */
+            background-color: #ffffff;
             padding: 10px;
             box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
             z-index: 1000;
@@ -139,24 +154,20 @@
         }
 
         .filter-item {
-        margin: 5px 0;
-        font-size: 14px;
-        color: #000000;  /* ライトテーマ時の文字色 */
-        border-bottom: none;  /* 下線を消す */
+            margin: 5px 0;
+            font-size: 14px;
+            color: #000000;
         }
 
-        
-
-        /* 絞り込み詳細にカーソルを合わせたときに青色 */
         .filter-item:hover {
-            color: #007bff;  /* 絞り込み詳細のカーソルホバー時の色 */
+            color: #007bff;
             cursor: pointer;
         }
 
         /* ←ボタン */
         .back-btn {
             position: fixed;
-            top: 10px;
+            top: 30px; /* 下に少し移動 */
             left: 10px;
             font-size: 24px;
             color: #007bff;
@@ -165,6 +176,39 @@
 
         .back-btn:hover {
             color: #0056b3;
+        }
+
+        /* ボタンのスタイル */
+        .photo-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px; /* メモの下に余白を作る */
+        }
+
+        .photo-button1 {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .photo-button1:hover {
+            background-color: #0056b3;
+        }
+
+        .photo-button2 {
+            padding: 8px 12px;
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .photo-button2:hover {
+            background-color: #ff0000;
         }
     </style>
 </head>
@@ -177,21 +221,20 @@
         <div class="menu-item"><a href="tags-page.html">タグ作成</a></div>
         <div class="menu-item"><a href="sort-page.html">並べ替え</a></div>
         <!-- 絞り込みメニュー -->
-    <label for="filter-toggle" class="menu-item">絞り込み</label>
+        <label for="filter-toggle" class="menu-item">絞り込み</label>
 
-    <!-- 絞り込みポップアップ -->
-    <input type="checkbox" id="filter-toggle">
-    <div class="filter-modal">
-        <a href="narrowed.php" class="filter-item">絞り込み1</a>
-        <div class="filter-item">絞り込み2</div>
-        <div class="filter-item">絞り込み3</div>
-    </div>
+        <!-- 絞り込みポップアップ -->
+        <input type="checkbox" id="filter-toggle">
+        <div class="filter-modal">
+            <a href="narrowed.php" class="filter-item">絞り込み1</a>
+            <div class="filter-item">絞り込み2</div>
+            <div class="filter-item">絞り込み3</div>
+        </div>
         <div class="menu-item"><a href="account-page.html">アカウント詳細</a></div>
     </div>
 
     <!-- メインエリア -->
     <main class="main-area">
-        <input type="text" class="title-input" placeholder="タイトル">
         <div class="photo-container">
             <div class="photo-placeholder">写真エリア</div>
             <div class="photo-details">
@@ -201,7 +244,14 @@
                 <span>20:27:50 2024.12.25</span>
             </div>
         </div>
-        <input type="text" class="memo-input" placeholder="メモ">
+        <div class="title-text">写真のタイトル</div>
+        <div class="memo-text">メモの内容をここに表示</div>
+        
+        <!-- メモの下にボタンを配置 -->
+        <div class="photo-buttons">
+            <button class="photo-button1">編集</button>
+            <button class="photo-button2">削除</button>
+        </div>
     </main>
 
     <!-- ログイン画面に戻るボタン -->
