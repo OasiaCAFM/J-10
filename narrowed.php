@@ -214,20 +214,6 @@
             background-color: rgba(0, 0, 0, 0.8);
         }
 
-        /* ←ボタン */
-        .back-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            color: #007bff;
-            text-decoration: none;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            z-index: 1001;
-        }
-
         .back-btn:hover {
             color: #0056b3;
         }
@@ -274,10 +260,10 @@
     <div class="tag-text">絞り込み１</div>
 
     <div class="menu-item">
-        <a href="photos-page.html">写真</a>
+        <a href="photos.php">写真</a>
     </div>
     <div class="menu-item">
-        <a href="albums-page.html">アルバム</a>
+        <a href="albams.php">アルバム</a>
     </div>
     <div class="menu-item">
         <a href="tags-page.html">タグ作成</a>
@@ -343,10 +329,6 @@
     <a href="#" class="close-btn">&times;"></a>
     <img src="https://via.placeholder.com/500" alt="写真2">
 </div>
-
-<!-- ログイン画面に戻るボタン -->
-<a href="login-page.html" class="back-btn">&larr;</a>
-<div class="back-btn-tooltip">ログイン画面に戻る</div>
 
 </body>
 </html>
