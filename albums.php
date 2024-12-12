@@ -39,7 +39,7 @@
 
         .menu-item {
             margin: 20px 0;
-            padding-left: 10px; /* 左側の余白を少し減らす */
+            padding-left: 20px; 
             font-size: 18px;
             color: #000000;
             cursor: pointer;
