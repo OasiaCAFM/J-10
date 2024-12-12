@@ -4,8 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
-    <title>画像アップロード</title>
 
     <style>
         .navbar {
@@ -42,10 +40,9 @@
             background: #313131;
             color: #FFF;
             }
-        /*枠線の設定*/  
 
         .button001 a:after {
-            content: '';
+            content: none;
             width: 5px;
             height: 5px;
             border-top: 3px solid #313131;
@@ -60,6 +57,14 @@
         .button001 a:hover:after {
             border-color: #FFF; /* ホバー時の矢印の色を白に変更 */
         }
+        #file-input {
+            height: 50px; /* ボタンの高さを指定 */
+            padding: 10px; /* 内側の余白を調整 */
+            font-size: 16px; /* フォントサイズを調整 */
+            line-height: normal; /* テキストの縦位置を調整 */
+        }
+
+        
 
     </style>
 </head>
