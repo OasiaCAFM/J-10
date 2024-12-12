@@ -1,17 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
     <title>画像アップロード</title>
-
-    <div class="button001">
-        <a href="photos.php">戻る</a>      
-    </div>
-
-
 
     <style>
         .navbar {
@@ -22,41 +16,63 @@
             color: #333; /* フォントカラーを濃い灰色に設定 */
         }
         #image-preview {
-            display: block; /* プレビュー領域を常に表示 */
+            display: none; /* 初期状態では非表示 */
             width: 100%; /* 幅をフォーム内に収める */
             max-width: 300px; /* プレビューの最大幅 */
-            height: 200px; /* 高さを固定 */
-            object-fit: contain; /* 縦横比を維持しつつ領域内に収める */
+            height: auto; /* 高さを自動調整 */
             margin-top: 10px; /* 他の要素と間隔を設定 */
-            border: none; /* 枠線を消去 */
-            background-color: #f8f9fa; /* 背景色を設定 */
+            object-fit: contain; /* 縦横比を維持しつつ領域内に収める */
         }
+            
+        .button001 a {
+            background: #eee;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 0 auto;
+            max-width: 280px;
+            padding: 10px 25px;
+            color: #313131;
+            transition: 0.3s ease-in-out;
+            font-weight: 500;
+        }
+        .button001 a:hover {
+            background: #313131;
+            color: #FFF;
+            }
+        /*枠線の設定*/  
+
+        .button001 a:after {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-top: 3px solid #313131;
+            border-left: 3px solid #313131; /* 左の枠線を追加 */
+            transform: rotate(-45deg) translateY(-50%); /* 回転方向を変更 */
+            position: absolute;
+            top: 50%;
+            left: 20px; /* 矢印を左側に配置 */
+            border-radius: 1px;
+            transition: 0.3s ease-in-out;
+        }
+        .button001 a:hover:after {
+            border-color: #FFF; /* ホバー時の矢印の色を白に変更 */
+        }
+
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-light">
-    <h2><a href="#" class="navbar-brand">Photos</a></h2>
+
+
+<nav class="navbar navbar-left">
+    <div class="button001">
+        <a href="photos.php">戻る</a>    
+    </div>
 </nav>
 <hr>
-
-<script>
-    // 画像プレビュー表示
-    const previewImage = () => {
-        const fileInput = document.getElementById("file-input");
-        const imagePreview = document.getElementById("image-preview");
-
-        if (fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        } else {
-            imagePreview.src = ""; // ファイルが選択されていない場合はリセット
-        }
-    };
-</script>
 
 <div class="container mt-4">
     <!-- フォーム -->
@@ -67,23 +83,25 @@
         id="upload-form"
         class="bg-light p-4 rounded shadow-sm"
     >
-        <div class="form-group">
-            <label for="file-input">画像ファイルを選択:</label>
-            <input
-                type="file"
-                name="image"
-                id="file-input"
-                accept="image/*"
-                class="form-control"
-                onchange="previewImage()"
-                required
-            />
-        </div>
+    <div class="form-group text-left">
+    <label for="file-input">画像ファイルを選択:</label>
+    <input
+        type="file"
+        name="image"
+        id="file-input"
+        accept="image/*"
+        class="form-control w-auto"  
+        onchange="previewImage()"
+        required
+    
+    />
+</div>
 
         <div class="form-group">
             <!-- プレビュー領域 -->
             <img
                 id="image-preview"
+                alt="プレビュー画像"
             />
         </div>
 
@@ -98,6 +116,7 @@
             />
         </div>
 
+
         <div class="form-group">
             <textarea name="memo" rows="4" cols="40" class="form-control" placeholder="メモを入力してください"></textarea>
         </div>
@@ -110,10 +129,29 @@
     <?php endif; ?>
 </div>
 
+<script>
+    // プレビュー表示
+    const previewImage = () => {
+        const fileInput = document.getElementById("file-input");
+        const imagePreview = document.getElementById("image-preview");
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            imagePreview.src = ""; // ファイルが選択されていない場合はリセット
+            imagePreview.style.display = "none"; // プレビューを非表示
+        }
+    };
+</script>
+
 <?php
 // データベース接続設定
 $dsn = "mysql:host=localhost;dbname=images;charset=utf8";
-
 $username = "root";
 $password = "root";
 
