@@ -43,8 +43,11 @@
 
         .menu-item {
             margin: 20px 0;
+            padding-left: 20px;
             font-size: 18px;
             color: #000000;
+            cursor: pointer;
+            text-align: left;
         }
 
         .menu-item a {
@@ -240,7 +243,5 @@
         </div>
     </main>
 
-    <!-- ログイン画面に戻るボタン -->
-    <a href="login-page.html" class="back-btn">&larr;</a>
 </body>
 </html>
