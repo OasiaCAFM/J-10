@@ -62,9 +62,9 @@
         /* メインエリア */
         .main-area {
             margin-left: 220px; /* サイドバーの幅分だけ左にずらす */
-            margin-top: 30px; /* ここで上下の位置を調整 */
+            margin-top: 10px; /* ここで上下の位置を調整 */
             padding: 20px;
-            max-width: 800px; /* 最大幅を設定して中央揃え */
+            max-width: 700px; /* 最大幅を調整 */
             width: 100%; /* 100%に設定して制限内で幅を調整 */
             box-sizing: border-box;
             display: flex;
@@ -97,22 +97,10 @@
             justify-content: center;
         }
 
-        .photo-placeholder {
+        .photo-placeholder img {
             width: 100%;
-            position: relative;
-            padding-top: 50%; /* 4:3 の比率 */
-            background-color: #ddd;
+            height: auto;
             border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .photo-placeholder::after {
-            content: "";
-            display: block;
-            padding-top: 0;
         }
 
         /* 詳細情報のスタイル */
@@ -126,45 +114,6 @@
         .photo-details span {
             font-size: 14px;
             color: #555;
-        }
-
-        /* 絞り込みメニュー */
-        #filter-toggle {
-            display: none;
-        }
-
-        /* 絞り込みメニュー（ポップアップ） */
-        .filter-modal {
-            display: block;
-            position: absolute;
-            top: 340px; /* 下に少し移動 */
-            left: 200px;
-            width: 200px;
-            background-color: #ffffff;
-            padding: 10px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease, pointer-events 0s linear 0.3s;
-            border-radius: 12px;
-        }
-
-        #filter-toggle:checked + .filter-modal {
-            opacity: 1;
-            pointer-events: auto;
-            transition: opacity 0.3s ease;
-        }
-
-        .filter-item {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #000000;
-        }
-
-        .filter-item:hover {
-            color: #007bff;
-            cursor: pointer;
         }
 
         /* ボタンのスタイル */
@@ -197,7 +146,7 @@
         }
 
         .photo-button2:hover {
-            background-color: #ff0000;
+            background-color: #cc0000;
         }
     </style>
 </head>
@@ -209,25 +158,17 @@
         <div class="menu-item"><a href="albums.php">アルバム</a></div>
         <div class="menu-item"><a href="tags-page.html">タグ作成</a></div>
         <div class="menu-item"><a href="sort-page.html">並べ替え</a></div>
-        <!-- 絞り込みメニュー -->
-        <label for="filter-toggle" class="menu-item">絞り込み</label>
-
-        <!-- 絞り込みポップアップ -->
-        <input type="checkbox" id="filter-toggle">
-        <div class="filter-modal">
-            <a href="narrowed.php" class="filter-item">絞り込み1</a>
-            <div class="filter-item">絞り込み2</div>
-            <div class="filter-item">絞り込み3</div>
-        </div>
         <div class="menu-item"><a href="account-page.html">アカウント詳細</a></div>
     </div>
 
     <!-- メインエリア -->
     <main class="main-area">
         <div class="photo-container">
-            <div class="photo-placeholder">写真エリア</div>
+            <div class="photo-placeholder">
+                <img src="https://j10s3.s3.us-east-1.amazonaws.com/_MG_2214.jpg" alt="写真">
+            </div>
             <div class="photo-details">
-                <span>Canon ESO Kiss X10i</span>
+                <span>Canon EOS Kiss X10i</span>
                 <span>55mm f/8.0 1/4s ISO5000</span>
                 <span>EF-S55-250mm f/4-5.6 IS STM</span>
                 <span>20:27:50 2024.12.25</span>
@@ -242,6 +183,5 @@
             <button class="photo-button2">削除</button>
         </div>
     </main>
-
 </body>
 </html>
