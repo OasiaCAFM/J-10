@@ -1,3 +1,25 @@
+<?php
+// データベース接続設定
+$dsn = 'mysql:host=localhost;dbname=images';
+$username = 'root';
+$password = 'root';
+
+try {
+    $pdo = new PDO($dsn, $username, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+
+    // 写真データを取得するクエリ
+    $stmt = $pdo->prepare("SELECT * FROM images");
+    $stmt->execute();
+    $photos = $stmt->fetchAll();
+} catch (PDOException $e) {
+    echo "データベース接続エラー: " . $e->getMessage();
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,6 +35,10 @@
             padding: 0;
             display: flex;
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        a {
+        text-decoration: none;  /* すべてのリンクの下線を消す */
         }
 
         /* サイドバー */
@@ -32,7 +58,7 @@
             transition: background-color 0.3s;
         }
 
-        .menu-title {
+        .menu-imageTitle {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
@@ -82,6 +108,7 @@
         }
 
         #filter-toggle:checked + .filter-modal {
+            display: block;
             opacity: 1;
             pointer-events: auto;
             transition: opacity 0.3s ease;
@@ -91,13 +118,11 @@
             margin: 5px 0;
             font-size: 14px;
             color: #000000;  /* ライトテーマ時の文字色 */
-            border-bottom: none;
         }
 
-        /* 絞り込み詳細にカーソルを合わせたときに青色 */
+        /* 絞り込みメニューの項目にカーソルを合わせたとき */
         .filter-item:hover {
-            color: #007bff;  /* 絞り込み詳細のカーソルホバー時の色 */
-            cursor: pointer;
+            color: #007bff;  /* カーソルを合わせたときに青くなる */
         }
 
         /* 写真追加ボタン */
@@ -128,14 +153,32 @@
 
         .photo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(3, 1fr); /* 横に3枚表示 */
             gap: 15px;
             margin-top: 20px;
         }
 
+        .photo-grid .photo-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 66.67%; /* 縦:横 = 2:3 */
+            overflow: hidden;
+            background-color: #f4f4f4; /* 背景色を指定して余白を目立たせない */
+        }
+
+        .photo-grid img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 画像が枠全体に収まるように表示 */
+        }
+
+
         .photo-item {
             background-color: #ffffff;
-            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
@@ -150,11 +193,13 @@
 
         .photo-thumb {
             width: 100%;
-            height: 150px;
-            object-fit: cover;
+            height: 100%;
+            object-fit: fill; /* 枠全体を埋めるように画像を表示 */
+            transition: transform 0.2s ease-in-out;
         }
 
-        .photo-title {
+
+        .photo-imageTitle {
             font-size: 16px;
             font-weight: 600;
             padding: 10px;
@@ -162,6 +207,11 @@
             color: #333;
             margin: 0;
         }
+
+        .photo-imageTitle a {
+            color: inherit;  /* 親要素の色を引き継ぐ */
+        }
+
 
         /* フルスクリーンポップアップ */
         .photo-modal {
@@ -252,8 +302,8 @@
 <body>
 
 <!-- サイドバー -->
-<div class="sidebar" id="sidebar">
-    <div class="menu-title">photos</div>
+<div class="sidebar" image_id="sidebar">
+    <div class="menu-imageTitle">photos</div>
     <div class="menu-item">
         写真</a>
     </div>
@@ -268,14 +318,13 @@
     </div>
 
     <!-- 絞り込みメニュー -->
-    <label for="filter-toggle" class="menu-item">絞り込み</label>
-
-    <!-- 絞り込みポップアップ -->
-    <input type="checkbox" id="filter-toggle">
-    <div class="filter-modal">
-        <a href="narrowed.php" class="filter-item">絞り込み1</a>
-        <div class="filter-item">絞り込み2</div>
-        <div class="filter-item">絞り込み3</div>
+    <div class="menu-item filter-container">
+        <span>絞り込み</span>
+        <div class="filter-modal">
+            <a href="narrowed.php" class="filter-item">絞り込み1</a>
+            <a href="narrowed.php" class="filter-item">絞り込み2</a>
+            <a href="narrowed.php" class="filter-item">絞り込み3</a>
+        </div>
     </div>
 
     <div class="menu-item">
@@ -290,38 +339,32 @@
 
 <!-- メインコンテンツ -->
 <div class="main-content">
-    <div class="photo-grid" id="photoGrid">
-        <!-- 写真1 -->
-        <div class="photo-item">
-            <a href="#photo1">
-                <img src="https://via.placeholder.com/150" alt="写真1" class="photo-thumb">
-            </a>
-            <div class="photo-info">
-                <p class="photo-title">写真1</p>
+    <div class="photo-grid">
+        <?php foreach ($photos as $photo): ?>
+            <div class="photo-item">
+                <a href="photo-details.php?image_id=<?= htmlspecialchars($photo['image_id']) ?>">  <!-- リンク追加 -->
+                    <div class="photo-wrapper">
+                        <img src="image.php?id=<?= htmlspecialchars($photo['image_id']) ?>" class="photo-thumb">
+                    </div>
+                    <div class="photo-info">
+                        <p class="photo-imageTitle"><?= htmlspecialchars($photo['imageTitle']) ?></p>
+                    </div>
+                </a>
             </div>
-        </div>
-        <!-- 写真2 -->
-        <div class="photo-item">
-            <a href="#photo2">
-                <img src="https://via.placeholder.com/150" alt="写真2" class="photo-thumb">
-            </a>
-            <div class="photo-info">
-                <p class="photo-title">写真2</p>
-            </div>
-        </div>
+
+        <?php endforeach; ?>
     </div>
+
+
+    <?php foreach ($photos as $photo): ?>
+        <div image_id="photo<?= htmlspecialchars($photo['image_id']) ?>" class="photo-modal">
+            <a href="#" class="close-btn">&times;</a>
+            <!-- 修正: $photo['image_id'] を使用 -->
+            <img src="image.php?id=<?= htmlspecialchars($photo['image_id']) ?>" class="mr-3">
+        </div>
+    <?php endforeach; ?>
 </div>
 
-<!-- 写真ポップアップ -->
-<div id="photo1" class="photo-modal">
-    <a href="#" class="close-btn">&times;</a>
-    <img src="https://via.placeholder.com/500" alt="写真1">
-</div>
-
-<div id="photo2" class="photo-modal">
-    <a href="#" class="close-btn">&times;</a>
-    <img src="https://via.placeholder.com/500" alt="写真2">
-    </div>
 
 </body>
 </html>
