@@ -1,3 +1,30 @@
+<?php
+// データベース接続
+$host = 'localhost';
+$dbname = 'j10img'; // データベース名
+$username = 'root'; // ユーザー名
+$password = 'root'; // パスワード
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// 接続確認
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// クエリの実行
+$sql = "SELECT id, Title, userName, FileName, MimeType, T_FileType, T_MimeType, IFD_Make, IFD_Model, IFD_Software, 
+                IFD_DateTime, ExposureTime, ApertureFNumber, ISOSpeedRatings, DateTimeOriginal, FocalLength, 
+                ColorSpace, ExposureMode, WhiteBalance, LensModel, Tag1, Tag2, Tag3, image_content, created_at
+        FROM j10images WHERE id = 9"; // 例えば、idが1の画像を取得
+$result = $conn->query($sql);
+
+// データを取得
+$imageData = null;
+if ($result->num_rows > 0) {
+    $imageData = $result->fetch_assoc();
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -112,9 +139,12 @@
         }
 
         .photo-details span {
-            font-size: 14px;
-            color: #555;
+        display: inline-block; /* インラインブロック要素にして幅を設定できるようにする */
+        width: 300px; /* 幅を指定 */
+        text-overflow: ellipsis; /* 省略記号を表示 */
+        padding-right: 10px; /* 右側に余白を追加 */
         }
+
 
         /* ボタンのスタイル */
         .photo-buttons {
@@ -165,18 +195,66 @@
     <main class="main-area">
         <div class="photo-container">
             <div class="photo-placeholder">
-                <img src="https://j10s3.s3.us-east-1.amazonaws.com/_MG_2214.jpg" alt="写真">
+                <!-- データベースから取得した画像を表示 -->
+                <?php if ($imageData): ?>
+                    <img src="https://j10s3.s3.us-east-1.amazonaws.com/<?php echo htmlspecialchars($imageData['FileName']); ?>" alt="写真">
+                <?php else: ?>
+                    <p>画像が見つかりません。</p>
+                <?php endif; ?>
             </div>
             <div class="photo-details">
-                <span>Canon EOS Kiss X10i</span>
-                <span>55mm f/8.0 1/4s ISO5000</span>
-                <span>EF-S55-250mm f/4-5.6 IS STM</span>
-                <span>20:27:50 2024.12.25</span>
+                <!-- 取得した情報を表示 -->
+                <?php if ($imageData): ?>
+                    <span>カメラ: <?php echo htmlspecialchars($imageData['IFD_Make']); ?> <?php echo htmlspecialchars($imageData['IFD_Model']); ?></span>
+                    <span>露出: <?php echo htmlspecialchars($imageData['ExposureTime']); ?> <?php echo htmlspecialchars($imageData['ApertureFNumber']); ?> ISO <?php echo htmlspecialchars($imageData['ISOSpeedRatings']); ?></span>
+                    <span>レンズ: <?php echo htmlspecialchars($imageData['LensModel']); ?></span>
+
+                    <?php
+                    // 焦点距離の変換処理
+                    $focalLength = isset($imageData['FocalLength']) ? $imageData['FocalLength'] : ''; // FocalLengthが存在しない場合は空文字を設定
+
+                    // 焦点距離が空でない場合、分数形式（例: 220/1）から変換
+                    if (!empty($focalLength) && strpos($focalLength, '/') !== false) {
+                        list($numerator, $denominator) = explode('/', $focalLength);
+                        $focalLength = $numerator; // 分子だけを使用
+                    }
+
+                    // 最終的にmmを追加
+                    $focalLength .= 'mm';
+                    ?>
+
+                    <span>焦点距離: <?php echo htmlspecialchars($focalLength); ?></span>
+                    <span>撮影日時: <?php echo htmlspecialchars($imageData['DateTimeOriginal']); ?></span>
+
+                    <?php
+                    // タグを配列として定義
+                    $tags = [
+                        'Tag1' => $imageData['Tag1'] ?? null,
+                        'Tag2' => $imageData['Tag2'] ?? null,
+                        'Tag3' => $imageData['Tag3'] ?? null,
+                        // 必要に応じてさらに追加
+                    ];
+
+                    // タグをループして表示
+                    $tagDisplay = ''; // 空の文字列で初期化
+
+                    foreach ($tags as $key => $tag) {
+                        if (!empty($tag) && $tag != 0) {
+                            // タグをかぎかっこで囲んで表示し、スペースで区切り
+                            $tagDisplay .= "<span>{" . htmlspecialchars($key) . ": " . htmlspecialchars($tag) . "}</span> ";
+                        }
+                    }
+
+                    echo rtrim($tagDisplay); // 末尾の余分なスペースを削除
+                    ?>
+
+                <?php else: ?>
+                    <p>詳細情報が見つかりません。</p>
+                <?php endif; ?>
             </div>
         </div>
-        <div class="title-text">写真のタイトル</div>
+        <div class="title-text"><?php echo htmlspecialchars($imageData['Title'] ?? 'タイトル'); ?></div>
         <div class="memo-text">メモの内容をここに表示</div>
-        
         <!-- メモの下にボタンを配置 -->
         <div class="photo-buttons">
             <button class="photo-button1">編集</button>
