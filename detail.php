@@ -1,3 +1,37 @@
+<?php
+$host = 'localhost';
+$dbname = 'j10img'; // データベース名
+$username = 'root'; // ユーザー名
+$password = 'root'; // パスワード
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// 接続確認
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// クエリパラメータからIDを取得
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// クエリの実行
+$sql = "SELECT id, Title, userName, FileName, MimeType, T_FileType, T_MimeType, IFD_Make, IFD_Model, IFD_Software, 
+                IFD_DateTime, ExposureTime, ApertureFNumber, ISOSpeedRatings, DateTimeOriginal, FocalLength, 
+                ColorSpace, ExposureMode, WhiteBalance, LensModel, Tag1, Tag2, Tag3, image_content, created_at
+        FROM j10images WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// データを取得
+$imageData = null;
+if ($result->num_rows > 0) {
+    $imageData = $result->fetch_assoc();
+}
+$stmt->close();
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -62,9 +96,9 @@
         /* メインエリア */
         .main-area {
             margin-left: 220px; /* サイドバーの幅分だけ左にずらす */
-            margin-top: 30px; /* ここで上下の位置を調整 */
+            margin-top: 10px; /* ここで上下の位置を調整 */
             padding: 20px;
-            max-width: 800px; /* 最大幅を設定して中央揃え */
+            max-width: 700px; /* 最大幅を調整 */
             width: 100%; /* 100%に設定して制限内で幅を調整 */
             box-sizing: border-box;
             display: flex;
@@ -97,22 +131,10 @@
             justify-content: center;
         }
 
-        .photo-placeholder {
+        .photo-placeholder img {
             width: 100%;
-            position: relative;
-            padding-top: 50%; /* 4:3 の比率 */
-            background-color: #ddd;
+            height: auto;
             border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .photo-placeholder::after {
-            content: "";
-            display: block;
-            padding-top: 0;
         }
 
         /* 詳細情報のスタイル */
@@ -124,48 +146,12 @@
         }
 
         .photo-details span {
-            font-size: 14px;
-            color: #555;
+        display: inline-block; /* インラインブロック要素にして幅を設定できるようにする */
+        width: 300px; /* 幅を指定 */
+        text-overflow: ellipsis; /* 省略記号を表示 */
+        padding-right: 10px; /* 右側に余白を追加 */
         }
 
-        /* 絞り込みメニュー */
-        #filter-toggle {
-            display: none;
-        }
-
-        /* 絞り込みメニュー（ポップアップ） */
-        .filter-modal {
-            display: block;
-            position: absolute;
-            top: 340px; /* 下に少し移動 */
-            left: 200px;
-            width: 200px;
-            background-color: #ffffff;
-            padding: 10px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease, pointer-events 0s linear 0.3s;
-            border-radius: 12px;
-        }
-
-        #filter-toggle:checked + .filter-modal {
-            opacity: 1;
-            pointer-events: auto;
-            transition: opacity 0.3s ease;
-        }
-
-        .filter-item {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #000000;
-        }
-
-        .filter-item:hover {
-            color: #007bff;
-            cursor: pointer;
-        }
 
         /* ボタンのスタイル */
         .photo-buttons {
@@ -197,7 +183,7 @@
         }
 
         .photo-button2:hover {
-            background-color: #ff0000;
+            background-color: #cc0000;
         }
     </style>
 </head>
@@ -209,39 +195,78 @@
         <div class="menu-item"><a href="albums.php">アルバム</a></div>
         <div class="menu-item"><a href="tags-page.html">タグ作成</a></div>
         <div class="menu-item"><a href="sort-page.html">並べ替え</a></div>
-        <!-- 絞り込みメニュー -->
-        <label for="filter-toggle" class="menu-item">絞り込み</label>
-
-        <!-- 絞り込みポップアップ -->
-        <input type="checkbox" id="filter-toggle">
-        <div class="filter-modal">
-            <a href="narrowed.php" class="filter-item">絞り込み1</a>
-            <div class="filter-item">絞り込み2</div>
-            <div class="filter-item">絞り込み3</div>
-        </div>
         <div class="menu-item"><a href="account-page.html">アカウント詳細</a></div>
     </div>
 
     <!-- メインエリア -->
     <main class="main-area">
         <div class="photo-container">
-            <div class="photo-placeholder">写真エリア</div>
+            <div class="photo-placeholder">
+                <!-- データベースから取得した画像を表示 -->
+                <?php if ($imageData): ?>
+                    <img src="image.php?id=<?= htmlspecialchars($imageData['id']) ?>" alt="<?= htmlspecialchars($imageData['Title']) ?>">
+                <?php else: ?>
+                    <p>画像が見つかりません。</p>
+                <?php endif; ?>
+            </div>
             <div class="photo-details">
-                <span>Canon ESO Kiss X10i</span>
-                <span>55mm f/8.0 1/4s ISO5000</span>
-                <span>EF-S55-250mm f/4-5.6 IS STM</span>
-                <span>20:27:50 2024.12.25</span>
+                <!-- 取得した情報を表示 -->
+                <?php if ($imageData): ?>
+                    <span>カメラ: <?php echo htmlspecialchars($imageData['IFD_Make']); ?> <?php echo htmlspecialchars($imageData['IFD_Model']); ?></span>
+                    <span>露出: <?php echo htmlspecialchars($imageData['ExposureTime']); ?> <?php echo htmlspecialchars($imageData['ApertureFNumber']); ?> ISO <?php echo htmlspecialchars($imageData['ISOSpeedRatings']); ?></span>
+                    <span>レンズ: <?php echo htmlspecialchars($imageData['LensModel']); ?></span>
+
+                    <?php
+                    // 焦点距離の変換処理
+                    $focalLength = isset($imageData['FocalLength']) ? $imageData['FocalLength'] : ''; // FocalLengthが存在しない場合は空文字を設定
+
+                    // 焦点距離が空でない場合、分数形式（例: 220/1）から変換
+                    if (!empty($focalLength) && strpos($focalLength, '/') !== false) {
+                        list($numerator, $denominator) = explode('/', $focalLength);
+                        $focalLength = $numerator; // 分子だけを使用
+                    }
+
+                    // 最終的にmmを追加
+                    $focalLength .= 'mm';
+                    ?>
+
+                    <span>焦点距離: <?php echo htmlspecialchars($focalLength); ?></span>
+                    <span>撮影日時: <?php echo htmlspecialchars($imageData['DateTimeOriginal']); ?></span>
+
+                    <?php
+                    // タグを配列として定義
+                    $tags = [
+                        'Tag1' => $imageData['Tag1'] ?? null,
+                        'Tag2' => $imageData['Tag2'] ?? null,
+                        'Tag3' => $imageData['Tag3'] ?? null,
+                        // 必要に応じてさらに追加
+                    ];
+
+                    // タグをループして表示
+                    $tagDisplay = ''; // 空の文字列で初期化
+
+                    foreach ($tags as $key => $tag) {
+                        if (!empty($tag) && $tag != 0) {
+                            // タグをかぎかっこで囲んで表示し、スペースで区切り
+                            $tagDisplay .= "<span>{" . htmlspecialchars($key) . ": " . htmlspecialchars($tag) . "}</span> ";
+                        }
+                    }
+
+                    echo rtrim($tagDisplay); // 末尾の余分なスペースを削除
+                    ?>
+
+                <?php else: ?>
+                    <p>詳細情報が見つかりません。</p>
+                <?php endif; ?>
             </div>
         </div>
-        <div class="title-text">写真のタイトル</div>
+        <div class="title-text"><?php echo htmlspecialchars($imageData['Title'] ?? 'タイトル'); ?></div>
         <div class="memo-text">メモの内容をここに表示</div>
-        
         <!-- メモの下にボタンを配置 -->
         <div class="photo-buttons">
             <button class="photo-button1">編集</button>
             <button class="photo-button2">削除</button>
         </div>
     </main>
-
 </body>
 </html>
