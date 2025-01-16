@@ -1,5 +1,4 @@
 <?php
-// データベース接続
 $host = 'localhost';
 $dbname = 'j10img'; // データベース名
 $username = 'root'; // ユーザー名
@@ -12,18 +11,26 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// クエリパラメータからIDを取得
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
 // クエリの実行
 $sql = "SELECT id, Title, userName, FileName, MimeType, T_FileType, T_MimeType, IFD_Make, IFD_Model, IFD_Software, 
                 IFD_DateTime, ExposureTime, ApertureFNumber, ISOSpeedRatings, DateTimeOriginal, FocalLength, 
                 ColorSpace, ExposureMode, WhiteBalance, LensModel, Tag1, Tag2, Tag3, image_content, created_at
-        FROM j10images WHERE id = 9"; // 例えば、idが1の画像を取得
-$result = $conn->query($sql);
+        FROM j10images WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 // データを取得
 $imageData = null;
 if ($result->num_rows > 0) {
     $imageData = $result->fetch_assoc();
 }
+$stmt->close();
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -197,7 +204,7 @@ if ($result->num_rows > 0) {
             <div class="photo-placeholder">
                 <!-- データベースから取得した画像を表示 -->
                 <?php if ($imageData): ?>
-                    <img src="https://j10s3.s3.us-east-1.amazonaws.com/<?php echo htmlspecialchars($imageData['FileName']); ?>" alt="写真">
+                    <img src="image.php?id=<?= htmlspecialchars($imageData['id']) ?>" alt="<?= htmlspecialchars($imageData['Title']) ?>">
                 <?php else: ?>
                     <p>画像が見つかりません。</p>
                 <?php endif; ?>
