@@ -7,7 +7,7 @@ session_start();
 
 // セッション変数 $_SESSION["loggedin"]を確認。ログイン済だったらウェルカムページへリダイレクト
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: list.php");
+    header("location: photos.php");
     exit;
 }
 //POSTされてきたデータを格納する変数の定義と初期化
@@ -55,7 +55,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $_SESSION["id"] = $row['id'];
                 $_SESSION["name"] =  $row['name'];
                 //ウェルカムページへリダイレクト
-                header("location:list.php");
+                header("location:photos.php");
                 exit();
             } else {
                 $login_err = 'ユーザー名もしくはパスワードが間違っています';

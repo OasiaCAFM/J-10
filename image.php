@@ -1,25 +1,15 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "j10img";
+require_once 'imageFunction.php';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$pdo = connectDB();
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$id = intval($_GET['id']);
-$sql = "SELECT image_content FROM j10images WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
+$sql = 'SELECT * FROM images WHERE image_id = :image_id LIMIT 1';
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':image_id', (int)$_GET['id'], PDO::PARAM_INT);
 $stmt->execute();
-$stmt->bind_result($image_content);
-$stmt->fetch();
-$stmt->close();
-$conn->close();
+$image = $stmt->fetch();
 
-header("Content-type: image/jpeg");
-echo $image_content;
+header('Content-type: ' . $image['image_type']);
+echo $image['image_content'];
+exit();
 ?>

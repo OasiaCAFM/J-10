@@ -1,36 +1,99 @@
 <?php
-$host = 'localhost';
-$dbname = 'j10img'; // データベース名
-$username = 'root'; // ユーザー名
-$password = 'root'; // パスワード
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(E_ALL);
+require_once 'imageFunction.php';
+require 'vendor/autoload.php';
 
-$conn = new mysqli($host, $username, $password, $dbname);
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+use Dotenv\Dotenv;
 
-// 接続確認
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+session_start();
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+// データベースに接続
+$pdo = connectDB();
+$err_msg = '';
+// 接続チェック
+if ($pdo === false) {
+    die("データベースに接続できませんでした。");
 }
+$pdo = connectDB();
+$err_msg = '';
 
-// クエリパラメータからIDを取得
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+// S3クライアントの作成
+$s3Client = new S3Client([
+    'region'      => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $_ENV['key'],
+        'secret' => $_ENV['secret'],
+    ],
+]);
 
-// クエリの実行
-$sql = "SELECT id, Title, userName, FileName, MimeType, T_FileType, T_MimeType, IFD_Make, IFD_Model, IFD_Software, 
-                IFD_DateTime, ExposureTime, ApertureFNumber, ISOSpeedRatings, DateTimeOriginal, FocalLength, 
-                ColorSpace, ExposureMode, WhiteBalance, LensModel, Tag1, Tag2, Tag3, image_content, created_at
-        FROM j10images WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
+$bucket = 'j10s3';
 
+// 削除処理
+if (isset($_GET['delete'])) {
+    $delete_id = filter_var($_GET['delete'], FILTER_VALIDATE_INT);
+
+    if ($delete_id === false) {
+        exit('無効なIDです。');
+    }
+
+    // 削除する写真のファイルパスを取得
+    $sql = "SELECT image_url FROM j10images WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        $file_path = $result['image_url'];
+
+        // ファイルを削除
+        if (file_exists($file_path)) {
+            unlink($file_path);
+        }
+        // S3からファイルを削除
+        try {
+            $s3Client->deleteObject([
+                'Bucket' => $bucket,
+                'Key' => basename($file_path),
+            ]);
+        } catch (AwsException $e) {
+            exit('S3からファイルを削除できませんでした: ' . $e->getMessage());
+        }
+        // データベースから写真情報を削除
+        $sql = "DELETE FROM j10images WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $delete_id, PDO::PARAM_INT);
+        $stmt->execute();
+            // 削除後にページをリフレッシュ
+        header("Location: photos.php");
+        exit();
+    } else {
+        exit('写真が見つかりませんでした。');
+        }
+    }
+
+// GETパラメータからIDを取得
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id) {
+    die("無効なIDが指定されました。");
+}
 // データを取得
-$imageData = null;
-if ($result->num_rows > 0) {
-    $imageData = $result->fetch_assoc();
-}
-$stmt->close();
-$conn->close();
+$sql = "SELECT id, image_title, u_id, file_name, IFD_Make, IFD_Model, 
+               IFD_DateTime, ExposureTime, ApertureFNumber, ISOSpeedRatings, DateTimeOriginal, FocalLength, 
+               LensModel, Tag1, Tag2, Tag3, created_at, image_url
+        FROM j10images WHERE id = :id";
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$imageData = $stmt->fetch(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -118,7 +181,7 @@ $conn->close();
         }
 
         .photo-container {
-            width: 100%;
+            width: 120%;
             background-color: #ffffff;
             border-radius: 12px;
             padding: 12px;
@@ -143,6 +206,8 @@ $conn->close();
             grid-template-columns: repeat(2, 1fr); /* 2列に設定 */
             gap: 10px; /* 列間の余白 */
             width: 100%;
+            padding-top: 10px;
+            border-top: 2px solid #ccc;
         }
 
         .photo-details span {
@@ -173,7 +238,7 @@ $conn->close();
             background-color: #0056b3;
         }
 
-        .photo-button2 {
+        .delete-btn {
             padding: 8px 12px;
             background-color: #ff0000;
             color: #ffffff;
@@ -181,9 +246,11 @@ $conn->close();
             border-radius: 5px;
             cursor: pointer;
         }
-
-        .photo-button2:hover {
-            background-color: #cc0000;
+        
+        .photo-title {
+            margin-bottom: 10px; /* タイトルと詳細情報の間隔を10pxに設定 */
+            font-size: 20px;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -192,81 +259,56 @@ $conn->close();
     <div class="sidebar">
         <div class="menu-title">photos</div>
         <div class="menu-item"><a href="photos.php">写真</a></div>
-        <div class="menu-item"><a href="albums.php">アルバム</a></div>
-        <div class="menu-item"><a href="tags-page.html">タグ作成</a></div>
-        <div class="menu-item"><a href="sort-page.html">並べ替え</a></div>
-        <div class="menu-item"><a href="account-page.html">アカウント詳細</a></div>
+        <div class="menu-item"><a href="narrowwing.php">並べ替え</a></div>
     </div>
-
-    <!-- メインエリア -->
-    <main class="main-area">
+ <!-- メインエリア -->
+ <main class="main-area">
         <div class="photo-container">
             <div class="photo-placeholder">
-                <!-- データベースから取得した画像を表示 -->
                 <?php if ($imageData): ?>
-                    <img src="image.php?id=<?= htmlspecialchars($imageData['id']) ?>" alt="<?= htmlspecialchars($imageData['Title']) ?>">
+                    <img src="<?= htmlspecialchars($imageData['image_url']) ?>" alt="<?= htmlspecialchars($imageData['image_title']) ?>">
                 <?php else: ?>
                     <p>画像が見つかりません。</p>
                 <?php endif; ?>
             </div>
+            <?php if ($imageData): ?>
+                <div class="photo-title"><?= htmlspecialchars($imageData['image_title'] ?? '') ?></div>
+            <?php endif; ?>
             <div class="photo-details">
-                <!-- 取得した情報を表示 -->
                 <?php if ($imageData): ?>
-                    <span>カメラ: <?php echo htmlspecialchars($imageData['IFD_Make']); ?> <?php echo htmlspecialchars($imageData['IFD_Model']); ?></span>
-                    <span>露出: <?php echo htmlspecialchars($imageData['ExposureTime']); ?> <?php echo htmlspecialchars($imageData['ApertureFNumber']); ?> ISO <?php echo htmlspecialchars($imageData['ISOSpeedRatings']); ?></span>
-                    <span>レンズ: <?php echo htmlspecialchars($imageData['LensModel']); ?></span>
-
-                    <?php
-                    // 焦点距離の変換処理
-                    $focalLength = isset($imageData['FocalLength']) ? $imageData['FocalLength'] : ''; // FocalLengthが存在しない場合は空文字を設定
-
-                    // 焦点距離が空でない場合、分数形式（例: 220/1）から変換
-                    if (!empty($focalLength) && strpos($focalLength, '/') !== false) {
-                        list($numerator, $denominator) = explode('/', $focalLength);
-                        $focalLength = $numerator; // 分子だけを使用
-                    }
-
-                    // 最終的にmmを追加
-                    $focalLength .= 'mm';
-                    ?>
-
-                    <span>焦点距離: <?php echo htmlspecialchars($focalLength); ?></span>
-                    <span>撮影日時: <?php echo htmlspecialchars($imageData['DateTimeOriginal']); ?></span>
-
-                    <?php
-                    // タグを配列として定義
-                    $tags = [
-                        'Tag1' => $imageData['Tag1'] ?? null,
-                        'Tag2' => $imageData['Tag2'] ?? null,
-                        'Tag3' => $imageData['Tag3'] ?? null,
-                        // 必要に応じてさらに追加
-                    ];
-
-                    // タグをループして表示
-                    $tagDisplay = ''; // 空の文字列で初期化
-
-                    foreach ($tags as $key => $tag) {
-                        if (!empty($tag) && $tag != 0) {
-                            // タグをかぎかっこで囲んで表示し、スペースで区切り
-                            $tagDisplay .= "<span>{" . htmlspecialchars($key) . ": " . htmlspecialchars($tag) . "}</span> ";
-                        }
-                    }
-
-                    echo rtrim($tagDisplay); // 末尾の余分なスペースを削除
-                    ?>
-
+                    <span>カメラ: <?= htmlspecialchars($imageData['IFD_Model']) ?></span>
+                    <span>露出: <?= htmlspecialchars($imageData['ExposureTime']) ?> <?= htmlspecialchars($imageData['ApertureFNumber']) ?> ISO <?= htmlspecialchars($imageData['ISOSpeedRatings']) ?></span>
+                    <span>レンズ: <?= htmlspecialchars($imageData['LensModel']) ?></span>
+                    <span>焦点距離: <?= htmlspecialchars(parseFocalLength($imageData['FocalLength'])) ?></span>
+                    <span>撮影日時: <?= htmlspecialchars($imageData['DateTimeOriginal']) ?></span>
                 <?php else: ?>
                     <p>詳細情報が見つかりません。</p>
                 <?php endif; ?>
             </div>
         </div>
-        <div class="title-text"><?php echo htmlspecialchars($imageData['Title'] ?? 'タイトル'); ?></div>
-        <div class="memo-text">メモの内容をここに表示</div>
-        <!-- メモの下にボタンを配置 -->
         <div class="photo-buttons">
-            <button class="photo-button1">編集</button>
-            <button class="photo-button2">削除</button>
+            <form action="compilation.php" method="GET">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($imageData['id']); ?>">
+                <button type="submit" class="photo-button1">編集</button>
+            </form>
+            <a href="?delete=<?= htmlspecialchars($imageData['id']) ?>" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
+
+        </div>
         </div>
     </main>
 </body>
 </html>
+
+<?php
+// 焦点距離を変換する関数
+function parseFocalLength($focalLength) {
+    if (empty($focalLength) || strpos($focalLength, '/') === false) {
+        return $focalLength . 'mm';
+    }
+    list($numerator, $denominator) = explode('/', $focalLength);
+    if (!is_numeric($numerator) || !is_numeric($denominator)) {
+        return $focalLength . '';
+    }
+    return intval($numerator / max(1, $denominator)) . 'mm';
+}
+?>

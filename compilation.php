@@ -1,32 +1,27 @@
 <?php
-// filepath: /c:/MAMP/htdocs/J-10/compilation.php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-$servername = "localhost";
-$username = "root";
-$password = "root";
-$dbname = "j10img";
+require_once 'imageFunction.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$pdo = connectDB();
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// 接続チェック
+
+if ($pdo === false) {
+    die("データベース接続に失敗しました。");
 }
 
 $id = $_GET['id'] ?? null;
 $imageData = null;
-
 if ($id) {
-    $sql = "SELECT * FROM j10images WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $sql = "SELECT * FROM j10images WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $imageData = $result->fetch_assoc();
-    $stmt->close();
+    $imageData = $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
     $ifd_make = $_POST['ifd_make'] ?? '';
@@ -43,17 +38,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tag2 = $_POST['tag2'] ?? '';
     $tag3 = $_POST['tag3'] ?? '';
 
-    $sql = "UPDATE j10images SET Title = ?, IFD_Make = ?, IFD_Model = ?, ExposureTime = ?, ApertureFNumber = ?, ISOSpeedRatings = ?, LensModel = ?, FocalLength = ?, DateTimeOriginal = ?, Tag1 = ?, Tag2 = ?, Tag3 = ? WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssssssssi", $title, $ifd_make, $ifd_model, $exposure_time, $aperture_fnumber, $iso_speed_ratings, $lens_model, $focal_length, $datetime_original, $tag1, $tag2, $tag3, $id);
+    $sql = "UPDATE j10images SET 
+                image_title = :image_title, 
+                IFD_Make = :ifd_make, 
+                IFD_Model = :ifd_model, 
+                ExposureTime = :exposure_time, 
+                ApertureFNumber = :aperture_fnumber, 
+                ISOSpeedRatings = :iso_speed_ratings, 
+                LensModel = :lens_model, 
+                FocalLength = :focal_length, 
+                DateTimeOriginal = :datetime_original
+            WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':image_title', $title, PDO::PARAM_STR);
+    $stmt->bindValue(':ifd_make', $ifd_make, PDO::PARAM_STR);
+    $stmt->bindValue(':ifd_model', $ifd_model, PDO::PARAM_STR);
+    $stmt->bindValue(':exposure_time', $exposure_time, PDO::PARAM_STR);
+    $stmt->bindValue(':aperture_fnumber', $aperture_fnumber, PDO::PARAM_STR);
+    $stmt->bindValue(':iso_speed_ratings', $iso_speed_ratings, PDO::PARAM_STR);
+    $stmt->bindValue(':lens_model', $lens_model, PDO::PARAM_STR);
+    $stmt->bindValue(':focal_length', $focal_length, PDO::PARAM_STR);
+    $stmt->bindValue(':datetime_original', $datetime_original, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
-    $stmt->close();
 
     header("Location: detail.php?id=" . $id);
     exit();
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -72,6 +83,9 @@ $conn->close();
             justify-content: center;
             align-items: flex-start;
             height: 100vh;
+        }
+        .form-group {
+            margin-bottom: 10px; /* テキストフィールドの間隔を10pxに設定 */
         }
 
         .main-area {
@@ -124,7 +138,8 @@ $conn->close();
         .button {
             padding: 8px 12px;
             font-size: 14px;
-            color: #ffffff;
+            background-color: #007bff;
+            color:rgb(255, 255, 255);
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -143,17 +158,28 @@ $conn->close();
         }
 
         .button-reset:hover {
-            background-color: #cc0000;
+            background-color:hsl(0, 100.00%, 40.00%);
+        }
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
+    <a href="detail.php?id=<?php echo htmlspecialchars($id); ?>" class="back-button">戻る</a>
     <main class="main-area">
         <?php if ($imageData): ?>
             <form action="compilation.php?id=<?php echo htmlspecialchars($id); ?>" method="POST">
                 <div class="form-group">
                     <label for="title">タイトル</label>
-                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($imageData['Title']); ?>">
+                    <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($imageData['image_title'] ?? ''); ?>">
                 </div>
                 <div class="form-group">
                     <label for="ifd_make">カメラメーカー</label>
@@ -191,23 +217,12 @@ $conn->close();
                     <label for="datetime_original_time">撮影時間</label>
                     <input type="time" id="datetime_original_time" name="datetime_original_time" value="<?php echo htmlspecialchars(explode(' ', $imageData['DateTimeOriginal'])[1]); ?>">
                 </div>
-                <div class="form-group">
-                    <label for="tag1">タグ1</label>
-                    <input type="text" id="tag1" name="tag1" value="<?php echo htmlspecialchars($imageData['Tag1']); ?>">
-                </div>
-                <div class="form-group">
-                    <label for="tag2">タグ2</label>
-                    <input type="text" id="tag2" name="tag2" value="<?php echo htmlspecialchars($imageData['Tag2']); ?>">
-                </div>
-                <div class="form-group">
-                    <label for="tag3">タグ3</label>
-                    <input type="text" id="tag3" name="tag3" value="<?php echo htmlspecialchars($imageData['Tag3']); ?>">
-                </div>
                 <button type="submit" class="button">保存</button>
             </form>
         <?php else: ?>
             <p>編集するデータが見つかりません。</p>
         <?php endif; ?>
+        
     </main>
 </body>
 </html>

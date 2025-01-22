@@ -48,7 +48,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             'id' =>null,
             'name'=>$datas['name'],
             'password'=>password_hash($datas['password'], PASSWORD_DEFAULT),
-            'created_at'=>null
+            'created_at' => date('Y-m-d H:i:s') // 現在の日時を設定(UTC)
         ];
 
         $count = 0;
